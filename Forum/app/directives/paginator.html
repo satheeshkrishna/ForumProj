@@ -1,0 +1,16 @@
+﻿<div>
+    Navigate: <a href="javascript:" ng-click="setPage(1)">
+        <span class="glyphicon glyphicon-backward"></span>
+    </a>
+    <a href="javascript:" ng-click="setPrevPage()">
+        <span class="glyphicon glyphicon-chevron-left"></span>
+    </a>
+    <a ng-repeat="pageNo in PageNumbers" ng-click="setPage(pageNo)">&nbsp;{{pageNo}}</a>
+    <a href="javascript:" ng-click="setNextPage()">
+        <span class="glyphicon glyphicon-chevron-right"></span>
+    </a>
+    <a href="javascript:" ng-click="setLastPage()">
+        <span class="glyphicon glyphicon-forward"></span>
+    </a>
+    <span>{{currentPage}}/{{totalPages()}} pages</span>
+</div>

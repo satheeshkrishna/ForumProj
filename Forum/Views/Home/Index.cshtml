@@ -1,0 +1,196 @@
+﻿@{
+    ViewBag.Title = "Forum";
+}
+
+@section scripts
+{
+    <script type="text/javascript" src="~/app/components/category/categoryService.js"></script>
+    <script type="text/javascript" src="~/app/components/category/categoryController.js"></script>
+
+    <script type="text/javascript" src="~/app/components/forum/forumService.js"></script>
+    <script type="text/javascript" src="~/app/components/forum/forumController.js"></script>
+}
+<div data-ng-app="app">
+    <section>
+        <div class="panel panel-primary" data-ng-controller="categoryController">
+            <div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="alert-dismissable error">{{ error }}</div>
+                        <div ng-show="isInfoAvailable" class="alert-dismissable alert-info">{{ information }}</div>
+                        <p data-ng-hide="addMode">
+                            <a data-ng-click="toggleAdd()" href="javascript:;" class="btn btn-primary"><span class="glyphicon glyphicon-plus-sign"></span>Add New Category</a>
+                        </p>
+
+                        <form id="addCategory"
+                              name="addCategory"
+                              class="form-horizontal"
+                              data-ng-show="addMode">
+                            <div class="form-group">
+                                <label for="categoryName" class="col-sm-2 control-label">Category Name:</label>
+                                <div class="col-sm-10">
+                                    <input type="text"
+                                           class="form-control"
+                                           id="categoryName"
+                                           placeholder="<Category name>"
+                                           data-ng-model="newCategory.Name" required />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="categoryDescription" class="col-sm-2 control-label">
+                                    Category Description:
+                                </label>
+                                <div class="col-sm-10">
+                                    <input type="text"
+                                           class="form-control"
+                                           id="categoryDescription"
+                                           placeholder="Describe your forum category here..."
+                                           data-ng-model="newCategory.Description"
+                                           required />
+                                </div>
+                            </div>
+                            <br />
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <input type="submit" value="Add" data-ng-click="add()"
+                                           data-ng-disabled="!addCategory.$valid"
+                                           class="btn btn-primary" />
+                                    <input type="button"
+                                           value="Cancel"
+                                           data-ng-click="toggleAdd()"
+                                           class="btn btn-primary" />
+                                </div>
+                            </div>
+                            <br />
+                        </form>
+                    </div>
+                </div>
+                <div id="emptyLines" class="row">
+                    <div class="col-md-12">
+                        <br />
+                        <br />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <pagination ng-model="currentPage"
+                                    @*data-ng-if="categories.length"*@
+                                    total-items="categories.length"
+                                    @*max-size="maxPageIndicators"*@
+                                    boundary-links="true">
+                        </pagination>
+                        <br />
+                        <mypaginator></mypaginator>
+                    </div>
+                    @*<div class="col-md-12">
+                            <div class="col-md-3">Page # you want to go</div>
+                            <div class="col-md-3">
+                                <input type="text" max="{{categories.length}}" min="1" ng-model="currentPage" />
+                                <span class="col-sm-offset-2">(max value: {{categories.length}})</span>
+                            </div>
+                            <div class="col-md-3">
+                                # of records per page
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" max="{{numberOfPagesAvailable()}}" min="1" ng-model="numberOfRowsPerPage" />
+                                <span class="col-sm-offset-2">(max value: {{numberOfPagesAvailable()}})</span>
+                            </div>
+                        </div>*@
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="table-responsive">
+                            <table class="table table-responsive table-hover">
+                                <tr>
+                                    <td>Name</td>
+                                    <th>Description</th>
+                                    <th></th>
+                                </tr>
+                                <tr data-ng-repeat="category in filteredCategories">
+                                    <td>
+                                        <a href="#/forum/{{category.Id}}">
+                                            <p data-ng-hide="category.editMode">{{ category.Name }}</p>
+                                            <input data-ng-show="category.editMode" type="text"
+                                                   data-ng-model="category.Name" />
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <p data-ng-hide="category.editMode">{{ category.Description }}</p>
+                                        <input data-ng-show="category.editMode" type="text"
+                                               data-ng-model="category.Description" />
+                                    </td>
+                                    <td>
+                                        <p data-ng-hide="category.editMode">
+                                            <a data-ng-click="toggleEdit(category)" href="javascript:;">Edit</a>
+                                            | <a data-ng-click="warnDeleteCategory(category)" href="javascript:;">Delete</a>
+                                        </p>
+                                        <p data-ng-show="category.editMode">
+                                            <a data-ng-click="save(category)" href="javascript:;">Save</a>
+                                            | <a data-ng-click="toggleEdit(category)" href="javascript:;">Cancel</a>
+                                        </p>
+                                        <p>
+                                            <a href="#/forum/{{category.Id}}">View forums</a>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            <hr />
+                        </div>
+                    </div>
+                </div>
+                <div id="mydiv" data-ng-show="loading">
+                    <img src="~/assets/images/ajax-loader.gif" class="ajax-loader" />
+                </div>
+
+                <div id="warnWindow" class="container" ng-show="canShowDeleteCategoryWarning()">
+                    <div class="row">
+                        <div class="alert-danger" style="padding:10px;">
+                            <strong>
+                                Deleting the category will also delete the forums in the category. Are you sure?
+                            </strong>
+                        </div>
+                    </div>
+                    <div class="row"><br /></div>
+                    <div class="row">
+                        <a class="btn btn-danger" href="javascript:void(0);" data-ng-click="deleteCategory(category)">Yes, Delete</a>
+                        <a class="btn btn-default" href="javascript:void(0);" data-ng-click="cancelDelete()">No, Don't Delete</a>
+                    </div>
+
+                    <div class="row">
+                        <br />
+                    </div>
+                    <div class="row">Forums in the category</div>
+                    <div id="forumDetails">
+                        <div class="row">
+                            <div class="col-md-12">
+
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" style="width:800px">
+                                        <tr>
+                                            <th>#</th>
+                                            <td>Title</td>
+                                        </tr>
+                                        <tr data-ng-repeat="forum in categoryToDelete.Forums">
+                                            <td>
+                                                {{forum.Id}}
+                                            </td>
+                                            <td>
+                                                {{forum.Title}}
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <hr />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section>
+        <div id="forumSection" data-ng-controller="forumController" class="container">
+            <ng-view></ng-view>
+        </div>
+    </section>
+</div>

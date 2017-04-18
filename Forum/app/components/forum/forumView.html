@@ -1,0 +1,201 @@
+﻿
+<div class="error">{{ error }}</div>
+<div ng-show="isInfoAvailable" class="alert-info">{{ information }}</div>
+
+<p data-ng-hide="addMode && isCategorySeleted()">
+    <a data-ng-click="toggleAdd()" href="javascript:;" class="btn btn-primary"><span class="glyphicon glyphicon-plus-sign"></span>Add new forum</a>
+</p>
+
+<div id="forumListScreen" class="panel panel-primary">
+    <div class="panel-heading">Forums under {{category.Name}} category</div>
+    <div ng-show="forumsExists()">
+        <div class="col-md-12">
+            <div class="table-responsive">
+                <mypaginator></mypaginator>
+                <table class="table table-hover">
+                    <tr>
+                        <td class="col-md-10">Title</td>
+                        <th class="col-md-2"></th>
+                    </tr>
+                    <tr data-ng-repeat="forum in filteredForums">
+                        <td class="col-md-10">
+                            <span class="glyphicon glyphicon-th-list"></span>
+                            <a data-ng-click="toggleDetails(forum)" title="Click this to view the details of {{ forum.Title }}." href="javascript:;">
+                                {{ forum.Title }}
+                            </a>
+                        </td>
+                        <td class="col-md-2">
+                            <p>
+                                <a data-ng-click="toggleEdit(forum)" class="glyphicon glyphicon-edit" href="javascript:;">Edit</a>
+                                | <a data-ng-click="warnDeleteForum(category.Id, forum)" class="glyphicon glyphicon-remove" href="javascript:;">Delete</a>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                <hr />
+            </div>
+        </div>
+    </div>
+    <div class="alert alert-info" ng-hide="forumsExists()">
+        <span class="glyphicon glyphicon-info-sign"></span>There are no forums available in this category - {{category.Name}}.
+    </div>
+</div>
+
+<div ng-switch="mode()">
+
+    <div ng-switch-when="Add">
+        <div id="forumContainer">
+            <div id="forumAddScreen" data-ng-show="addMode" class="panel panel-primary">
+                <div class="panel-heading">
+                    Add a new forum under {{category.Name}} category.
+                </div>
+                <br />
+                <div class="col-md-12">
+                    <form id="addForum"
+                          name="addForum"
+                          class="form-horizontal">
+                        <div class="form-group">
+                            <label for="forumName" class="col-sm-2 control-label">Forum title:</label>
+                            <div class="col-sm-10">
+                                <input type="text"
+                                       class="form-control"
+                                       id="forumTitle"
+                                       placeholder="<Forum title>"
+                                       data-ng-model="newForum.Title" required />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="forumContent" class="col-sm-2 control-label">
+                                Content:
+                            </label>
+                            <div class="col-sm-10">
+                                <input type="text"
+                                       class="form-control"
+                                       id="forumContent"
+                                       placeholder="Content..."
+                                       data-ng-model="newForum.Content"
+                                       required />
+                            </div>
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <input type="submit" value="Add" data-ng-click="add()"
+                                       data-ng-disabled="!addForum.$valid"
+                                       class="btn btn-primary" />
+                                <input type="button"
+                                       value="Cancel"
+                                       data-ng-click="toggleAdd()"
+                                       class="btn btn-primary" />
+                            </div>
+                        </div>
+                        <br />
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div id="ForumSectionEmptyLines"><br /><br /></div>
+    </div>
+
+    <!--<div id="forumListScreen" ng-switch-default class="panel panel-primary">
+        <div class="panel-heading">Forums under {{category.Name}} category</div>
+        <div ng-show="forumsExists()">
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <mypaginator></mypaginator>
+                    <table class="table table-hover">
+                        <tr>
+                            <td class="col-md-10">Title</td>
+                            <th class="col-md-2"></th>
+                        </tr>
+                        <tr data-ng-repeat="forum in filteredForums">
+                            <td class="col-md-10">
+                                <span class="glyphicon glyphicon-th-list"></span>
+                                <a data-ng-click="toggleDetails(forum)" title="Click this to view the details of {{ forum.Title }}." href="javascript:;">
+                                    {{ forum.Title }}
+                                </a>
+                            </td>
+                            <td class="col-md-2">
+                                <p>
+                                    <a data-ng-click="toggleEdit(forum)" class="glyphicon glyphicon-edit" href="javascript:;">Edit</a>
+                                    | <a data-ng-click="warnDeleteForum(category.Id, forum)" class="glyphicon glyphicon-remove" href="javascript:;">Delete</a>
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                    <hr />
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-info" ng-hide="forumsExists()">
+            <span class="glyphicon glyphicon-info-sign"></span>There are no forums available in this category - {{category.Name}}.
+        </div>
+    </div>-->
+
+
+    <div id="forumDetailsScreen" class="panel panel-primary" data-ng-show="detailsMode" ng-switch-when="Details">
+        <div class="panel-heading">
+            <span class="glyphicon glyphicon-th-list"></span>
+            {{ForumToView.Title}} details
+            <span class="glyphicon glyphicon-step-backward">
+                <a class="text-right" href="javascript:" ng-click="toggleListMode()">Back</a>
+            </span>
+        </div>
+
+        <div class="panel-body">
+            <div class="panel-title">
+                <div class="panel-title">{{ForumToView.Title}}</div>
+            </div>
+            <div class="panel-body">
+                <div class="panel-info">{{ForumToView.Content}}</div>
+            </div>
+        </div>
+        <div class="panel-footer">
+            <span class="glyphicon glyphicon-step-backward"></span><a href="javascript:" ng-click="toggleListMode()">Back to forums</a>
+        </div>
+    </div>
+
+    <div id="forumEditScreen" data-ng-show="canShowEditMode()" class="panel panel-primary" ng-switch-when="Edit">
+        <div class="panel-heading">
+            <span class="glyphicon glyphicon-edit"></span> {{forumToEdit.Title}}
+        </div>
+        <div class="panel-body">
+            <div class="form-horizontal">
+                <div class="row">
+                    <div class="col-md-2">Title</div>
+                    <div class="col-md-10 text-left">
+                        <input type="text"
+                               class="form-control"
+                               id="forumEditTitle"
+                               placeholder="Title..."
+                               data-ng-model="forumToEdit.Title"
+                               required />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2">Content</div>
+                    <div class="col-md-10 text-info">
+                        <input type="text"
+                               class="form-control"
+                               id="forumEditContent"
+                               placeholder="Content..."
+                               data-ng-model="forumToEdit.Content"
+                               required />
+                    </div>
+                </div>
+                <div class="row">
+                    <a class="btn btn-primary" data-ng-click="save()" href="javascript:;">Save</a>
+                    | <a class="btn" data-ng-click="cancelEditForum()" href="javascript:;">Cancel</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="mydiv" data-ng-show="loading">
+            <img src="../assets/images/ajax-loader.gif" class="ajax-loader" />
+        </div>
+    </div>
+
+</div>
+<!--<div class="row">
+    <a href="#" ng-click="setCurrentView('category')">Back to category</a>
+</div>-->
